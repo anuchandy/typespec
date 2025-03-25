@@ -65,6 +65,7 @@ final class ResponseTypeFactory {
             // If the responseBodyType is InputStream it needs to be converted to Flux<ByteBuffer> so
             // that it is a valid return type for async method.
             final IType bType = (bodyType == ClassType.INPUT_STREAM) ? GenericType.FLUX_BYTE_BUFFER : bodyType;
+            // Mono<com.azure.core.http.rest.ResponseBase<H, T>>
             return mono(GenericType.RestResponse(headersType, bType));
         }
 

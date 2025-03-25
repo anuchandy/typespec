@@ -10,6 +10,7 @@ import com.azure.core.util.polling.PollingStrategyOptions;
 import com.azure.core.util.serializer.TypeReference;
 import com.microsoft.typespec.http.client.generator.core.extension.model.codemodel.RequestParameterLocation;
 import com.microsoft.typespec.http.client.generator.core.extension.plugin.JavaSettings;
+import com.microsoft.typespec.http.client.generator.core.mapper.MethodParameterTransformer.ParameterTransformation;
 import com.microsoft.typespec.http.client.generator.core.model.javamodel.JavaVisibility;
 import com.microsoft.typespec.http.client.generator.core.util.CodeNamer;
 import com.microsoft.typespec.http.client.generator.core.util.MethodUtil;
@@ -91,7 +92,7 @@ public class ClientMethod {
     /**
      * The parameter transformations before calling ProxyMethod.
      */
-    private final List<MethodTransformationDetail> methodTransformationDetails;
+    private final List<ParameterTransformation> parameterTransformations;
 
     private final JavaVisibility methodVisibility;
 
@@ -124,7 +125,7 @@ public class ClientMethod {
      * @param isGroupedParameterRequired The parameter that needs to transformed before pagination.
      * @param groupedParameterTypeName The type name of groupedParameter.
      * @param methodPageDetails The pagination information if this is a paged method.
-     * @param methodTransformationDetails The parameter transformations before calling ProxyMethod.
+     * @param parameterTransformations The parameter transformations before calling ProxyMethod.
      * @param externalDocumentation The external documentation.
      * @param hasWithContextOverload Whether this method has a corresponding {@code Context}-based overload.
      */
@@ -133,7 +134,7 @@ public class ClientMethod {
         ProxyMethod proxyMethod, Map<String, String> validateExpressions, String clientReference,
         List<String> requiredNullableParameterExpressions, boolean isGroupedParameterRequired,
         String groupedParameterTypeName, MethodPageDetails methodPageDetails,
-        List<MethodTransformationDetail> methodTransformationDetails, JavaVisibility methodVisibility,
+        List<ParameterTransformation> parameterTransformations, JavaVisibility methodVisibility,
         JavaVisibility methodVisibilityInWrapperClient, ImplementationDetails implementationDetails,
         MethodPollingDetails methodPollingDetails, ExternalDocumentation externalDocumentation,
         String crossLanguageDefinitionId, boolean hasWithContextOverload) {
@@ -159,7 +160,7 @@ public class ClientMethod {
         this.isGroupedParameterRequired = isGroupedParameterRequired;
         this.groupedParameterTypeName = groupedParameterTypeName;
         this.methodPageDetails = methodPageDetails;
-        this.methodTransformationDetails = methodTransformationDetails;
+        this.parameterTransformations = parameterTransformations;
         this.methodVisibility = methodVisibility;
         this.implementationDetails = implementationDetails;
         this.methodPollingDetails = methodPollingDetails;
@@ -189,7 +190,7 @@ public class ClientMethod {
             && type == that.type
             && Objects.equals(requiredNullableParameterExpressions, that.requiredNullableParameterExpressions)
             && Objects.equals(groupedParameterTypeName, that.groupedParameterTypeName)
-            && Objects.equals(methodTransformationDetails, that.methodTransformationDetails)
+            && Objects.equals(parameterTransformations, that.parameterTransformations)
             && methodVisibility == that.methodVisibility;
     }
 
@@ -197,7 +198,7 @@ public class ClientMethod {
     public int hashCode() {
         return Objects.hash(returnValue.getType(), name, getParametersDeclaration(), onlyRequiredParameters, type,
             requiredNullableParameterExpressions, isGroupedParameterRequired, groupedParameterTypeName,
-            methodTransformationDetails, methodVisibility);
+            parameterTransformations, methodVisibility);
     }
 
     public String getCrossLanguageDefinitionId() {
@@ -299,8 +300,8 @@ public class ClientMethod {
         return methodPageDetails;
     }
 
-    public final List<MethodTransformationDetail> getMethodTransformationDetails() {
-        return methodTransformationDetails;
+    public final List<ParameterTransformation> getParameterTransformations() {
+        return parameterTransformations;
     }
 
     public ExternalDocumentation getMethodDocumentation() {
@@ -333,9 +334,9 @@ public class ClientMethod {
                 : parameterName;
 
             String result;
-            if (getMethodTransformationDetails().stream()
+            if (getParameterTransformations().stream()
                 .anyMatch(d -> d.getOutParameter().getName().equals(parameterName + "1"))) {
-                result = getMethodTransformationDetails().stream()
+                result = getParameterTransformations().stream()
                     .filter(d -> d.getOutParameter().getName().equals(parameterName + "1"))
                     .findFirst()
                     .get()
@@ -554,7 +555,7 @@ public class ClientMethod {
         protected boolean isGroupedParameterRequired;
         protected String groupedParameterTypeName;
         protected MethodPageDetails methodPageDetails;
-        protected List<MethodTransformationDetail> methodTransformationDetails;
+        protected List<ParameterTransformation> parameterTransformations;
         protected JavaVisibility methodVisibility = JavaVisibility.Public;
         protected JavaVisibility methodVisibilityInWrapperClient = JavaVisibility.Public;
         protected ImplementationDetails implementationDetails;
@@ -721,11 +722,11 @@ public class ClientMethod {
         /**
          * Sets the parameter transformations before calling ProxyMethod.
          *
-         * @param methodTransformationDetails the parameter transformations before calling ProxyMethod
+         * @param transformations the parameter transformations before calling ProxyMethod
          * @return the Builder itself
          */
-        public Builder methodTransformationDetails(List<MethodTransformationDetail> methodTransformationDetails) {
-            this.methodTransformationDetails = methodTransformationDetails;
+        public Builder parameterTransformations(List<ParameterTransformation> transformations) {
+            this.parameterTransformations = transformations;
             return this;
         }
 
@@ -806,7 +807,7 @@ public class ClientMethod {
         public ClientMethod build() {
             return new ClientMethod(description, returnValue, name, parameters, onlyRequiredParameters, type,
                 proxyMethod, validateExpressions, clientReference, requiredNullableParameterExpressions,
-                isGroupedParameterRequired, groupedParameterTypeName, methodPageDetails, methodTransformationDetails,
+                isGroupedParameterRequired, groupedParameterTypeName, methodPageDetails, parameterTransformations,
                 methodVisibility, methodVisibilityInWrapperClient, implementationDetails, methodPollingDetails,
                 externalDocumentation, crossLanguageDefinitionId, hasWithContextOverload);
         }

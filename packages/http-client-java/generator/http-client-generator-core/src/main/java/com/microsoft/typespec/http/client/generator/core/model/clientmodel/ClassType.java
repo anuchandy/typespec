@@ -35,6 +35,7 @@ import com.azure.core.http.policy.RetryOptions;
 import com.azure.core.http.policy.RetryPolicy;
 import com.azure.core.http.rest.RequestOptions;
 import com.azure.core.http.rest.Response;
+import com.azure.core.http.rest.ResponseBase;
 import com.azure.core.http.rest.RestProxy;
 import com.azure.core.http.rest.SimpleResponse;
 import com.azure.core.http.rest.StreamResponse;
@@ -193,6 +194,7 @@ public class ClassType implements IType {
     public static final ClassType MATCH_CONDITIONS = new Builder().knownClass(MatchConditions.class).build();
     public static final ClassType CORE_UTILS = getClassTypeBuilder(CoreUtils.class).build();
     public static final ClassType RESPONSE = getClassTypeBuilder(Response.class).build();
+    public static final ClassType RESPONSE_BASE = getClassTypeBuilder(ResponseBase.class).build();
     public static final ClassType SIMPLE_RESPONSE = getClassTypeBuilder(SimpleResponse.class).build();
     public static final ClassType EXPANDABLE_STRING_ENUM = getClassTypeBuilder(ExpandableStringEnum.class).build();
     public static final ClassType EXPANDABLE_ENUM = getClassTypeBuilder(ExpandableEnum.class).build();
