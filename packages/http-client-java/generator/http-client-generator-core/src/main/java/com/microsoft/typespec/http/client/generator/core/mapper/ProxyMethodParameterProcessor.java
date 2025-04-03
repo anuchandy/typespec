@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 final class ProxyMethodParameterProcessor {
-    private static final String APPLICATION_JSON_PATCH = "application/json-patch+json";
     private final Operation operation;
     private final boolean operationHasSingleContentType;
     private final JavaSettings settings;
@@ -36,10 +35,9 @@ final class ProxyMethodParameterProcessor {
      * Processes the {@code operation} and the given request to create and organize proxy method parameters.
      *
      * @param request the request to process.
-     * @param contentType the content type of the request.
      * @return a {@link Result} object containing the proxy method parameters.
      */
-    Result process(Request request, String contentType) {
+    Result process(Request request) {
         final List<ProxyMethodParameter> parameters = new ArrayList<>();
         final List<ProxyMethodParameter> allParameters = new ArrayList<>();
         final List<String> specialHeaderParameterNames;
@@ -55,7 +53,7 @@ final class ProxyMethodParameterProcessor {
 
         // Http Parameters.
         //
-        final boolean isJsonPatch = contentType.startsWith(APPLICATION_JSON_PATCH);
+        final boolean isJsonPatch = request.getContentType().startsWith(Request.CONTENT_TYPE_APPLICATION_JSON_PATCH);
         for (Parameter parameter : getHttpParameters(request)) {
             parameter.setOperation(operation);
             final ProxyMethodParameter proxyMethodParameter = toProxyMethodParameter(parameter, isJsonPatch);

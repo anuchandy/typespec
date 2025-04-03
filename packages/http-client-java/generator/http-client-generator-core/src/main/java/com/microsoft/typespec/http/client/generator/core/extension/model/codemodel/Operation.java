@@ -9,6 +9,7 @@ import com.microsoft.typespec.http.client.generator.core.extension.base.util.Jso
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a single callable endpoint with a discrete set of inputs, and any number of output possibilities
@@ -401,6 +402,21 @@ public class Operation extends Metadata {
      */
     public void setInternalApi(Boolean internalApi) {
         this.internalApi = internalApi;
+    }
+
+    /**
+     * Checks if the operation has any responses with a header schema defined.
+     *
+     * @return True if the operation has any responses with a header schema defined, false otherwise.
+     */
+    public boolean hasHeaderSchemaResponse() {
+        return this.getResponses()
+            .stream()
+            .filter(r -> r.getProtocol() != null
+                && r.getProtocol().getHttp() != null
+                && r.getProtocol().getHttp().getHeaders() != null)
+            .flatMap(r -> r.getProtocol().getHttp().getHeaders().stream().map(Header::getSchema))
+            .anyMatch(Objects::nonNull);
     }
 
     @Override

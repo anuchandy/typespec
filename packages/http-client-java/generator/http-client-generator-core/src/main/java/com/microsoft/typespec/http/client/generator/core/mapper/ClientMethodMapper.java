@@ -154,8 +154,6 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
         // shouldn't eagerly be done anymore as it would have resulted in erroneous synchronous implementation client
         // methods.
 
-        Map<Request, List<ProxyMethod>> proxyMethodsMap = Mappers.getProxyMethodMapper().map(operation);
-
         List<ClientMethod> methods = new ArrayList<>();
 
         // If this operation is part of a group it'll need to be referenced with a more specific target.
@@ -198,6 +196,7 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
             builder.methodDocumentation(externalDocumentation);
         }
 
+        final Map<Request, List<ProxyMethod>> proxyMethodsMap = Mappers.getProxyMethodMapper().map(operation);
         List<Request> requests = getCodeModelRequests(operation, isProtocolMethod, proxyMethodsMap);
         for (Request request : requests) {
             List<ProxyMethod> proxyMethods = proxyMethodsMap.get(request);
@@ -226,8 +225,10 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
                         .collect(Collectors.toList());
                 }
 
-                final boolean isJsonPatch = MethodUtil.isContentTypeInRequest(request, "application/json-patch+json");
+                final boolean isJsonPatch = request.hasContentType(Request.CONTENT_TYPE_APPLICATION_JSON_PATCH);
+                final boolean replaceFluxByteBufferWithBinaryData = proxyMethod.hasBinaryDataParameter();
 
+<<<<<<< HEAD
                 final boolean proxyMethodUsesBinaryData = proxyMethod.getParameters()
                     .stream()
                     .anyMatch(proxyMethodParameter -> proxyMethodParameter.getClientType() == ClassType.BINARY_DATA);
@@ -236,6 +237,8 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
                     .anyMatch(
                         proxyMethodParameter -> proxyMethodParameter.getClientType() == GenericType.FLUX_BYTE_BUFFER);
 
+=======
+>>>>>>> b8a6ee1d4 (client mapper cleanup)
                 for (Parameter parameter : codeModelParameters) {
                     ClientMethodParameter clientMethodParameter
                         = Mappers.getClientParameterMapper().map(parameter, isProtocolMethod);
@@ -247,7 +250,7 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
 
                     // If the codemodel parameter and proxy method parameter types don't match, update the client
                     // method param to use proxy method parameter type.
-                    if (proxyMethodUsesBinaryData
+                    if (replaceFluxByteBufferWithBinaryData
                         && clientMethodParameter.getClientType() == GenericType.FLUX_BYTE_BUFFER) {
                         clientMethodParameter = updateClientMethodParameter(clientMethodParameter);
                     }
@@ -380,7 +383,7 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
                     builder.methodVisibility(simpleAsyncMethodVisibilityWithContext);
                     addClientMethodWithContext(methods, builder, parameters, getContextParameter(isProtocolMethod));
 
-                    if (JavaSettings.getInstance().isSyncStackEnabled() && !proxyMethodUsesFluxByteBuffer) {
+                    if (JavaSettings.getInstance().isSyncStackEnabled() && !proxyMethod.hasFluxByteBufferParameter()) {
                         // WithResponseSync, with required and optional parameters
                         builder
                             .returnValue(createSimpleSyncRestResponseReturnValue(operation,
@@ -1565,7 +1568,7 @@ public class ClientMethodMapper implements IMapper<Operation, List<ClientMethod>
     private static String formatReturnTypeDescription(String description) {
         description = description.trim();
         int endIndex = description.indexOf(". ");   // Get 1st sentence.
-        if (endIndex == -1 && description.length() > 0 && description.charAt(description.length() - 1) == '.') {
+        if (endIndex == -1 && !description.isEmpty() && description.charAt(description.length() - 1) == '.') {
             // Remove last period.
             endIndex = description.length() - 1;
         }

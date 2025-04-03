@@ -290,9 +290,9 @@ public class ProxyMethodMapper implements IMapper<Operation, Map<Request, List<P
         UniqueProxyMethodNameGenerator methodNameGenerator, JavaSettings settings) {
         final List<ProxyMethod> methods = new ArrayList<>();
 
-        final String contentType = getRequestContentType(request);
-        final ProxyMethodParameterProcessor.Result r = parameterProcessor.process(request, contentType);
+        final ProxyMethodParameterProcessor.Result r = parameterProcessor.process(request);
 
+        final String contentType = request.getContentType();
         final ProxyMethod.Builder builder = builderSource.newBuilder();
         builder.requestContentType(contentType);
         builder.baseURL(request.getProtocol().getHttp().getUri());

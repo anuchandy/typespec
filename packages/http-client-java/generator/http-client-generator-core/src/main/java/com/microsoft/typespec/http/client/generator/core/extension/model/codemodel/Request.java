@@ -14,6 +14,9 @@ import java.util.List;
  * Represents a request to an operation.
  */
 public class Request extends Metadata {
+    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    public static final String CONTENT_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
+
     private List<Parameter> parameters = new ArrayList<>();
     private List<Parameter> signatureParameters = new ArrayList<>();
 
@@ -57,6 +60,44 @@ public class Request extends Metadata {
      */
     public void setSignatureParameters(List<Parameter> signatureParameters) {
         this.signatureParameters = signatureParameters;
+    }
+
+    /**
+     * Gets the content type defined for the request.
+     * <p>
+     * the method check for mediaTypes first as that is more specific than the knownMediaType
+     * if there are multiple, we'll use the generic type. if none found then uses "application/json"
+     * as the default.
+     * </p>
+     *
+     * @return the content type defined for the request.
+     */
+    public String getContentType() {
+        final Protocols protocols = super.getProtocol();
+        if (protocols != null && protocols.getHttp() != null) {
+            final List<String> mediaTypes = protocols.getHttp().getMediaTypes();
+            if (mediaTypes != null && mediaTypes.size() == 1) {
+                return mediaTypes.get(0);
+            }
+            if (protocols.getHttp().getKnownMediaType() != null) {
+                return protocols.getHttp().getKnownMediaType().getContentType();
+            }
+        }
+        return CONTENT_TYPE_APPLICATION_JSON;
+    }
+
+    /**
+     * Checks if the request has a specific content type.
+     *
+     * @param contentType the content type to check for.
+     * @return true if the request has the specified content type, false otherwise.
+     */
+    public boolean hasContentType(String contentType) {
+        final Protocols protocols = super.getProtocol();
+        if (protocols == null || protocols.getHttp() == null) {
+            return false;
+        }
+        return protocols.getHttp().getMediaTypes() != null && protocols.getHttp().getMediaTypes().contains(contentType);
     }
 
     @Override

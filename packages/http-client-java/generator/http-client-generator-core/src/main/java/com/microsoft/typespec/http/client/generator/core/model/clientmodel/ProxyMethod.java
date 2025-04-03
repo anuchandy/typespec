@@ -297,6 +297,14 @@ public class ProxyMethod {
         return customHeaderIgnored;
     }
 
+    public boolean hasBinaryDataParameter() {
+        return parameters.stream().anyMatch(p -> p.getClientType() == ClassType.BINARY_DATA);
+    }
+
+    public boolean hasFluxByteBufferParameter() {
+        return parameters.stream().anyMatch(p -> p.getClientType() == GenericType.FLUX_BYTE_BUFFER);
+    }
+
     public ProxyMethod toSync() {
         if (isSync) {
             return this;
